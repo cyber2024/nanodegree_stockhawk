@@ -8,20 +8,29 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.gcm.GcmNetworkManager;
+import com.google.android.gms.gcm.PeriodicTask;
+import com.google.android.gms.gcm.Task;
+import com.melnykov.fab.FloatingActionButton;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.StockOverTime;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.QuoteCursorAdapter;
@@ -29,14 +38,12 @@ import com.sam_chordas.android.stockhawk.rest.RecyclerViewItemClickListener;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
-import com.google.android.gms.gcm.GcmNetworkManager;
-import com.google.android.gms.gcm.PeriodicTask;
-import com.google.android.gms.gcm.Task;
-import com.melnykov.fab.FloatingActionButton;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
-public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+import static android.widget.Toast.LENGTH_SHORT;
 
+public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+  private static final String TAG = MyStocksActivity.class.getSimpleName();
   /**
    * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
    */
@@ -85,8 +92,30 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             new RecyclerViewItemClickListener.OnItemClickListener() {
               @Override public void onItemClick(View v, int position) {
                 //TODO:
-                // do something on item click
-              }
+                // do something on item click\
+                LinearLayout ll = (LinearLayout)v;
+                TextView tvStockCode = (TextView)ll.getChildAt(0);
+                LinearLayout llCollectionItem = (LinearLayout)ll.getChildAt(1);
+                TextView tvValue = (TextView) llCollectionItem.getChildAt(0);
+                TextView tvChange = (TextView) llCollectionItem.getChildAt(1);
+                String sValue = tvValue.getText().toString(),
+                        sChange = tvChange.getText().toString(),
+                        sCode = tvStockCode.getText().toString();
+
+//                llCollectionItem.setFocusableInTouchMode(true);
+                llCollectionItem.setContentDescription(sCode + " " + sValue + " " + sChange);
+                //llCollectionItem.hasFocus();
+
+                Log.d(TAG, sCode + " " + sValue + " " + sChange);
+                Intent intent = new Intent(MyStocksActivity.this, StockOverTime.class);
+                intent.putExtra("stockcode", sCode);
+                startActivity(intent);
+                }
+//                TextView v0 = (TextView)((ViewGroup)v).getChildAt(0);
+//                TextView v1 = (TextView)((ViewGroup)v).getChildAt(1);
+
+
+
             }));
     recyclerView.setAdapter(mCursorAdapter);
 
@@ -163,7 +192,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   }
 
   public void networkToast(){
-    Toast.makeText(mContext, getString(R.string.network_toast), Toast.LENGTH_SHORT).show();
+    Toast.makeText(mContext, getString(R.string.network_toast), LENGTH_SHORT).show();
   }
 
   public void restoreActionBar() {

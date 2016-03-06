@@ -97,6 +97,9 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
       symbol.setTypeface(robotoLight);
       bidPrice = (TextView) itemView.findViewById(R.id.bid_price);
       change = (TextView) itemView.findViewById(R.id.change);
+      itemView.setFocusable(true);
+      itemView.setFocusableInTouchMode(true);
+      itemView.setContentDescription(symbol.getText().toString() + " " + bidPrice.getText().toString() + " "+ change.getText().toString());
     }
 
     @Override
