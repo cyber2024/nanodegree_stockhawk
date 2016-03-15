@@ -39,10 +39,13 @@ import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
+import com.sam_chordas.android.stockhawk.widget.QuoteWidgetProvider;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+
+  public static final String LOG_TAG = MyStocksActivity.class.getSimpleName();
   private static final String TAG = MyStocksActivity.class.getSimpleName();
   /**
    * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -102,23 +105,16 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                         sChange = tvChange.getText().toString(),
                         sCode = tvStockCode.getText().toString();
 
-//                llCollectionItem.setFocusableInTouchMode(true);
                 llCollectionItem.setContentDescription(sCode + " " + sValue + " " + sChange);
-                //llCollectionItem.hasFocus();
 
                 Log.d(TAG, sCode + " " + sValue + " " + sChange);
                 Intent intent = new Intent(MyStocksActivity.this, StockOverTime.class);
                 intent.putExtra("stockcode", sCode);
                 startActivity(intent);
                 }
-//                TextView v0 = (TextView)((ViewGroup)v).getChildAt(0);
-//                TextView v1 = (TextView)((ViewGroup)v).getChildAt(1);
-
-
 
             }));
     recyclerView.setAdapter(mCursorAdapter);
-
 
     FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
     fab.attachToRecyclerView(recyclerView);
@@ -245,11 +241,22 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   public void onLoadFinished(Loader<Cursor> loader, Cursor data){
     mCursorAdapter.swapCursor(data);
     mCursor = data;
+    updateWidgets();
   }
 
   @Override
   public void onLoaderReset(Loader<Cursor> loader){
     mCursorAdapter.swapCursor(null);
   }
+
+  public void updateWidgets(){
+
+    Context context = this;
+    Intent dataUpdatedIntent = new Intent(QuoteWidgetProvider.ACTION_DATA_UPDATED)
+            .setPackage(context.getPackageName());
+    context.sendBroadcast(dataUpdatedIntent);
+    Log.d(LOG_TAG, "Send broadcast to update widgets.");
+  }
+
 
 }
